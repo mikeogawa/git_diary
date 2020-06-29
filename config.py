@@ -9,7 +9,7 @@ TARGET_HASH = [
 ]
 
 # Saving Name
-FILENAME_PATH = "./diary/%Y_%m/%Y_%m_30.md"
+FILENAME_PATH = "./diary/%Y_%m/%Y_%m_%d.md"
 
 # Bundling (This stocks the dairy data)
 ALLOW_BUNDLING = True
