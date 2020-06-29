@@ -1,7 +1,33 @@
 # Git Diary
 This repository helps keep track of what you've done so far and so forth.
 
-This is mainly intended to keep track of the accomplishment I've acheived during work etc.
+This is mainly intended to keep track of the accomplishment I've made during work etc.
+
+You can have a to do list (ex:`diary.md`) and target sections that you want to keep track of.
+
+You will also be able to budle sections of markdowns. 
+
+If you check `diary/`, you'll notice that it only takes part of `diary.md`.
+```
+# To Do
+- [ ] wash the dishes
+- [ ] Clean My room
+...
+
+# Gone
+# # Private Stuff
+# - [ ] Watch Starwars 
+
+# Done
+- Aboslutely Nothing
+```
+
+You can also extract and change markdown text using `config.py` when bundling as shown below:
+```
+### 2020/...
+**Done**
+- Aboslutely Nothing
+```
 
 # Installing
 
