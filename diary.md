@@ -1,12 +1,10 @@
 # To Do
 
-- [ ] clean china
-- [ ] mop the floor
-- [ ] eat break fast
+- [ ] wash the dishes
+- [ ] Clean My room
 
 # Private Stuff
-- [ ] How to train your dragon
-- [ ] Checking Tokyo Stock
+- [ ] Watch Starwars
 
 # Done
 - Aboslutely Nothing

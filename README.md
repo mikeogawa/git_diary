@@ -7,28 +7,30 @@ This is mainly intended to keep track of the accomplishment I've acheived during
 
 1. First Fork this repository and clone
 
-2. Setup git configuration
+2. modify `config.py`
+
+3. Setup git configuration
 ```
 git config --local user.name <USERNAME>
 git config --local user.email <EMAIL>
 git config --local user.password <PASSWORD>
 ```
 
-3. Add a shortcut (zshrc)
+4. Add a terminal shortcut (zshrc)
+The following adds shortcut to zshrc.
 ```
-echo "alias push_diary=python $(pwd|cat)/command.py" >> "~/.zshrc"
-# or echo "alias push_diary=python $(pwd|cat)/command.py" >> "~/.bashrc"
+cd git_diary
+echo "alias push_diary=\"python $(pwd|cat)/command.py\"" >> ~/.zshrc
+source ~/.zshrc
 ```
 
-4. Remove Current Diary 
+5. Remove Current Diary 
 ```
 rm -r diary/
 rm diary.md
 git commit -m "own commit"
 ``` 
 This is for sample purpose thus this is unrequired
-
-5. modify `config.py`
 
 6. Push: `git push -u origin master`
 

@@ -1,15 +1,18 @@
 import os
+import sys
 import re
 import config
 import datetime
 import subprocess as sub
+import time
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
 
 class MDReader:
-    def __init__(self,file):
+    def __init__(self,file_text, target_hash=config.TARGET_HASH):
+        self.target_hash = target_hash
         self.res = []
-        with open(file) as f:
-            line_array = f.read().strip().split("\n")
+        line_array = file_text.split("\n")
         self.extract_markdown(line_array)
     
     def extract_markdown(self,line_array):
@@ -30,12 +33,10 @@ class MDReader:
         return re.match("^#{1}",x) is not None
 
     def extract_header(self,x):
-        res = re.sub("^#{1}","",x).strip()
-        print(res)
-        return res 
+        return re.sub("^#{1}","",x).strip()
 
     def is_target_header(self,x):
-        return x in config.TARGET_HASH
+        return x in self.target_hash
 
     def add_line(self,line):
         self.res.append(line)
@@ -55,31 +56,73 @@ def check_make_dir(filename):
 def preprocess_filename(filename):
     if re.match("^(./)",filename):
         filename = re.sub("^(./)","",filename)
-    path = os.getcwd()
+    path = current_dir
     return os.path.join(path,filename)
+
+def append_mode(file_name, text):
+
+    title = config.BUNDLE_TARGET_TITLE + " " + file_name.split("/")[-1].split(".")[0]
+    md = MDReader(text,config.BUNDLE_TARGET_HASH)
+    text = md.get_text()
+    text_list = text.split("\n")
+    for k,v in config.BUNDLE_REGEX_DICT.items():
+        text_list = [re.sub(k,v,x) for x in text_list]
+    new_text = title + "\n" + "\n".join(text_list) + "\n"
+
+    bundle_path = preprocess_filename(datetime.datetime.now().strftime(config.BUNDLE_FILE_NAME_PATH))
+
+    if not os.path.isfile(bundle_path):
+        cmd = "git checkout {};".format(bundle_path)
+        pid = sub.Popen(cmd, stdout=sub.PIPE,stderr=sub.PIPE,shell=True,cwd=current_dir)
+        out, err = pid.communicate()
+        print(out.decode("utf-8"))
+        pid.wait()
+
+    if os.path.isfile(bundle_path):
+        with open(bundle_path,'r') as f:
+            saved_text = f.read()
+    else:
+        saved_text = ""
+    with open(bundle_path,'w') as f:
+        f.write(new_text+saved_text)
+    
+    return bundle_path
 
 def main():
     diary_path = preprocess_filename(config.DIARY_DIR)
-    text = get_md_text(diary_path)
-    file_name = datetime.datetime.now().strftime(config.FILENAME_DIR)
+
+    with open(diary_path) as f:
+        diary_text = f.read().strip()
+    text = get_md_text(diary_text)
+
+    file_name = datetime.datetime.now().strftime(config.FILENAME_PATH)
     file_name_abs = preprocess_filename(file_name)
     check_make_dir(file_name_abs)
     with open(file_name_abs,"w") as f:
         f.write(text)
+    bundle_path = append_mode(file_name, text) if config.ALLOW_BUNDLING else ""
+    git(file_name,file_name_abs,bundle_path)
+    if config.DELETE_AFTER_COMMIT:
+        delete_files(file_name_abs,bundle_path)
 
-def git(file_name,file_name_abs):
-    cmd = [
+
+def git(file_name,file_name_abs,bundle_path):
+    cmd = ";".join([
         "git add {}".format(file_name_abs),
-        "git commit -m \"{}\"",format(file_name),
-        "git push origin master"]
-    pid = sub.Popen(cmd, stdout=sub.PIPE,stderr=sub.PIPE)
+        "git add {}".format(bundle_path) if bundle_path != "" else "",
+        "git commit -m \"{}\"".format(file_name),
+        "git push -f origin master",
+        "echo  Push Complete"])
+    pid = sub.Popen(cmd, stdout=sub.PIPE,stderr=sub.PIPE,shell=True,cwd=current_dir)
     out, err = pid.communicate()
     print(out.decode("utf-8"))
     print(err.decode("utf-8"))
 
-def after_commit(file_name_abs):
-    if config.DELETE_AFTER_COMMIT:
-        os.remove(file_name_abs)
+def delete_files(file_name_abs,bundle_path):
+    os.remove(file_name_abs)
+    if bundle_path != "":
+        os.remove(bundle_path)
+
 
 if __name__=="__main__":
     main()
